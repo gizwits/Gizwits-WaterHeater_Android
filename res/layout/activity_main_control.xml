@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.gizwits.framework.widget.SlidingMenu xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_layout"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:scrollbars="none" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal" >
+
+        <include layout="@layout/activity_slibbar" />
+        <!-- id starts with @+id/split_conditioner_control_ -->
+
+        <RelativeLayout
+            android:id="@+id/rlControlMainPage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#ffffff"
+            android:visibility="visible" >
+
+            <RelativeLayout
+                android:id="@+id/rlHeader"
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+                android:layout_alignParentTop="true"
+                android:background="@drawable/water_heating_top" >
+
+                <ImageView
+                    android:id="@+id/ivMenu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="10dp"
+                    android:padding="10dp"
+                    android:src="@drawable/icon_menu" />
+
+                <TextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:text="@string/main_control_title"
+                    android:textColor="@android:color/white"
+                    android:textSize="22sp" />
+
+                <ImageView
+                    android:id="@+id/ivPower"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="10dp"
+                    android:padding="10dp"
+                    android:src="@drawable/icon_power" />
+
+                <RelativeLayout
+                    android:id="@+id/rlAlarmTips"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_centerInParent="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="5dp"
+                    android:layout_toRightOf="@+id/tvTitle"
+                    android:gravity="center"
+                    android:visibility="gone" >
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:src="@drawable/fault_tips" />
+
+                    <TextView
+                        android:id="@+id/tvAlarmTipsCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerVertical="true"
+                        android:textColor="#006cff"
+                        android:textSize="18sp" />
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rlPowerOn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/rlHeader" >
+
+                <LinearLayout
+                    android:id="@+id/llFooter"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal" >
+
+                    <RelativeLayout
+                        android:id="@+id/rlTimer"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/water_heating_bottom_style2"
+                        android:onClick="onClick" >
+
+                        <TextView
+                            android:id="@+id/tvTimer"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:drawableTop="@drawable/home_tab_alarm_icon"
+                            android:gravity="center"
+                            android:text="@string/appointment_water"
+                            android:textColor="#ffffff"
+                            android:textSize="12sp" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/rlMode"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:background="@drawable/water_heating_bottom_style3"
+                        android:onClick="onClick" >
+
+                        <TextView
+                            android:id="@+id/tvMode"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:drawableTop="@drawable/home_tab_heating_icon"
+                            android:gravity="center"
+                            android:text="@string/pattern_intelligence"
+                            android:textColor="#ffffff"
+                            android:textSize="12sp" />
+                    </RelativeLayout>
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/rlContent"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_above="@+id/llFooter"
+                    android:layout_alignParentTop="true"
+                    android:background="@drawable/water_heating_home_bg"
+                    android:onClick="onClick" >
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="30dp"
+                        android:layout_marginLeft="50dp"
+                        android:layout_marginRight="50dp"
+                        android:layout_marginTop="35dp"
+                        android:visibility="visible" >
+
+                        <TextView
+                            android:id="@+id/tvHeaterTips"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:gravity="center"
+                            android:text="@string/heater_is_heating"
+                            android:textColor="@color/white" />
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:layout_width="290dp"
+                        android:layout_height="290dp"
+                        android:layout_centerInParent="true"
+                        android:layout_gravity="center"
+                        android:gravity="center" >
+
+                        <com.gizwits.framework.widget.CircularSeekBar
+                            android:id="@+id/csbSeekbar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:rotation="-180" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_centerInParent="true"
+                            android:gravity="center"
+                            android:orientation="vertical" >
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal" >
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/main_control_actual_temp"
+                                    android:textColor="@color/white"
+                                    android:textSize="16sp" />
+
+                                <TextView
+                                    android:id="@+id/tvCurrentTemperature"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="16"
+                                    android:textColor="@color/white"
+                                    android:textSize="22sp" />
+
+                                <TextView
+                                    android:id="@+id/tvInnerUnit"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/main_control_degree"
+                                    android:textColor="@color/white"
+                                    android:textSize="22sp" />
+                            </LinearLayout>
+
+                            <RelativeLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_horizontal" >
+
+                                <TextView
+                                    android:id="@+id/tvSettingTemerature"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:layout_centerHorizontal="true"
+                                    android:text="30"
+                                    android:textColor="@color/white"
+                                    android:textSize="100sp" />
+
+                                <TextView
+                                    android:id="@+id/tvSettingUnit"
+                                    android:layout_width="wrap_content"
+                                    android:layout_alignTop="@id/tvSettingTemerature"
+                                    android:layout_toRightOf="@id/tvSettingTemerature"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/main_control_degree2"
+                                    android:textColor="@color/white"
+                                    android:textSize="25sp" />
+                            </RelativeLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/main_control_set_temp"
+                                android:textColor="@color/white"
+                                android:textSize="18sp" />
+                        </LinearLayout>
+                    </RelativeLayout>
+                </RelativeLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rlPowerOff"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/rlHeader"
+                android:background="@color/transparent_half"
+                android:visibility="gone" >
+
+                <RelativeLayout
+                    android:id="@+id/rlPowerButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:onClick="onClick" >
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/shutdown" />
+
+                    <TextView
+                        android:id="@+id/tvTempCurrentTips"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:paddingTop="25dp"
+                        android:textColor="@color/white"
+                        android:textSize="18sp" />
+                </RelativeLayout>
+            </RelativeLayout>
+        </RelativeLayout>
+    </LinearLayout>
+
+</com.gizwits.framework.widget.SlidingMenu>
