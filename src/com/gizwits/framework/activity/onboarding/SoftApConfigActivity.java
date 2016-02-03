@@ -369,7 +369,8 @@ public class SoftApConfigActivity extends BaseActivity implements OnClickListene
                 handler.sendEmptyMessage(handler_key.TICK_TIME.ordinal());
             }
         }, 1000, 1000);
-        mCenter.cSetSoftAp(strSsid, strPsw);
+        String ssidAP = NetworkUtils.getCurentWifiSSID(SoftApConfigActivity.this);
+        mCenter.cSetSoftAp(strSsid, strPsw, ssidAP);
     }
 
     @Override
@@ -406,7 +407,9 @@ public class SoftApConfigActivity extends BaseActivity implements OnClickListene
          */
         @Override
         public void onReceive(Context context, Intent intent) {
-
+        	if (llConfig.getVisibility() != View.GONE && ivBack.getVisibility() == View.GONE) {
+				return;
+			}
             if (NetworkUtils.isWifiConnected(context) && NetworkUtils.getCurentWifiSSID(SoftApConfigActivity.this).contains("XPG-GAgent")) {
                 handler.sendEmptyMessage(handler_key.CHANGE_WIFI.ordinal());
             }

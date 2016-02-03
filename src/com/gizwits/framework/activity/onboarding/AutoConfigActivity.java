@@ -29,13 +29,16 @@ import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.ToggleButton;
+import android.widget.AdapterView.OnItemSelectedListener;
 
 import com.gizwits.heater.R;
 import com.gizwits.framework.activity.BaseActivity;
@@ -47,8 +50,7 @@ import com.xpg.ui.utils.ToastUtils;
 /**
  * 
  * ClassName: Class AutoConfigActivity. <br/>
- * 自动配置界面
- * <br/>
+ * 自动配置界面 <br/>
  * date: 2014-12-9 17:30:20 <br/>
  * 
  * @author Lien
@@ -66,18 +68,20 @@ public class AutoConfigActivity extends BaseActivity implements OnClickListener 
 
 	/** The btn next. */
 	private Button btnNext;
-	
+	/** The sp mode */
+	private Spinner sp_mode;
+	private static int mode_temp;
 	/**
-     * The iv back.
-     */
-    private ImageView ivBack;
+	 * The iv back.
+	 */
+	private ImageView ivBack;
 
-	/**  网络状态广播接受器. */
+	/** 网络状态广播接受器. */
 	ConnecteChangeBroadcast mChangeBroadcast = new ConnecteChangeBroadcast();
-	
+
 	/** The str ssid. */
 	private String strSsid;
-	
+
 	/** The str psw. */
 	private String strPsw;
 
@@ -109,8 +113,7 @@ public class AutoConfigActivity extends BaseActivity implements OnClickListener 
 			handler_key key = handler_key.values()[msg.what];
 			switch (key) {
 			case CHANGE_WIFI:
-				strSsid = NetworkUtils
-						.getCurentWifiSSID(AutoConfigActivity.this);
+				strSsid = NetworkUtils.getCurentWifiSSID(AutoConfigActivity.this);
 				tvSsid.setText(getString(R.string.wifi_name) + strSsid);
 				break;
 
@@ -121,7 +124,8 @@ public class AutoConfigActivity extends BaseActivity implements OnClickListener 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see com.gizwits.aircondition.activity.BaseActivity#onCreate(android.os.Bundle)
+	 * @see com.gizwits.aircondition.activity.BaseActivity#onCreate(android.os.
+	 * Bundle)
 	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -135,11 +139,13 @@ public class AutoConfigActivity extends BaseActivity implements OnClickListener 
 	 * Inits the views.
 	 */
 	private void initViews() {
+		sp_mode = (Spinner) findViewById(R.id.sp_mode);
+		//
 		tvSsid = (TextView) findViewById(R.id.tvSsid);
 		etInputPsw = (EditText) findViewById(R.id.etInputPsw);
 		tbPswFlag = (ToggleButton) findViewById(R.id.tbPswFlag);
 		btnNext = (Button) findViewById(R.id.btnNext);
-		ivBack=(ImageView) findViewById(R.id.ivBack);
+		ivBack = (ImageView) findViewById(R.id.ivBack);
 	}
 
 	/**
@@ -151,15 +157,25 @@ public class AutoConfigActivity extends BaseActivity implements OnClickListener 
 		tbPswFlag.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 			@Override
-			public void onCheckedChanged(CompoundButton buttonView,
-					boolean isChecked) {
-                if (isChecked) {
-                    etInputPsw.setInputType(InputType.TYPE_CLASS_TEXT
-                            | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
-                } else {
-                    etInputPsw.setInputType(InputType.TYPE_CLASS_TEXT
-                            | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-                }
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+				if (isChecked) {
+					etInputPsw.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+				} else {
+					etInputPsw.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+				}
+
+			}
+		});
+		sp_mode.setOnItemSelectedListener(new OnItemSelectedListener() {
+
+			@Override
+			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+				mode_temp = position;
+
+			}
+
+			@Override
+			public void onNothingSelected(AdapterView<?> parent) {
 
 			}
 		});
@@ -174,22 +190,23 @@ public class AutoConfigActivity extends BaseActivity implements OnClickListener 
 	public void onClick(View v) {
 		switch (v.getId()) {
 		case R.id.btnNext:
-			if (!NetworkUtils.isWifiConnected(this)){
+			if (!NetworkUtils.isWifiConnected(this)) {
 				ToastUtils.showShort(this, getString(R.string.wifi_first));
 				break;
 			}
-			
-			if(StringUtils.isEmpty(strSsid)){
+
+			if (StringUtils.isEmpty(strSsid)) {
 				ToastUtils.showShort(this, getString(R.string.wifi_first));
 				break;
 			}
-			
-			Intent intent = new Intent(AutoConfigActivity.this,AirlinkActivity.class);
+
+			Intent intent = new Intent(AutoConfigActivity.this, AirlinkActivity.class);
 			intent.putExtra("ssid", strSsid);
+			intent.putExtra("Temp", mode_temp);
 			strPsw = etInputPsw.getText().toString().trim();
-			if(!StringUtils.isEmpty(strPsw)){
+			if (!StringUtils.isEmpty(strPsw)) {
 				intent.putExtra("psw", strPsw);
-			}else{
+			} else {
 				intent.putExtra("psw", "");
 			}
 			startActivity(intent);
@@ -202,7 +219,9 @@ public class AutoConfigActivity extends BaseActivity implements OnClickListener 
 
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see com.gizwits.framework.activity.BaseActivity#onResume()
 	 */
 	@Override
@@ -216,7 +235,9 @@ public class AutoConfigActivity extends BaseActivity implements OnClickListener 
 		}
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see android.app.Activity#onPause()
 	 */
 	public void onPause() {
@@ -227,7 +248,7 @@ public class AutoConfigActivity extends BaseActivity implements OnClickListener 
 
 	@Override
 	public void onBackPressed() {
-		startActivity(new Intent(AutoConfigActivity.this,SearchDeviceActivity.class));
+		startActivity(new Intent(AutoConfigActivity.this, SearchDeviceActivity.class));
 		finish();
 	}
 
@@ -238,8 +259,12 @@ public class AutoConfigActivity extends BaseActivity implements OnClickListener 
 	 */
 	public class ConnecteChangeBroadcast extends BroadcastReceiver {
 
-		/* (non-Javadoc)
-		 * @see android.content.BroadcastReceiver#onReceive(android.content.Context, android.content.Intent)
+		/*
+		 * (non-Javadoc)
+		 * 
+		 * @see
+		 * android.content.BroadcastReceiver#onReceive(android.content.Context,
+		 * android.content.Intent)
 		 */
 		@Override
 		public void onReceive(Context context, Intent intent) {
