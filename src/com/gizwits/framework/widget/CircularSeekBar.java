@@ -29,6 +29,7 @@ import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Xfermode;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -190,7 +191,7 @@ public class CircularSeekBar extends View {
 
 			@Override
 			public void onProgressChange(CircularSeekBar view, int newProgress) {
-
+				
 			}
 		};
 
@@ -344,7 +345,7 @@ public class CircularSeekBar extends View {
 		Paint circlePaint2 = new Paint();
 		circlePaint2.setAntiAlias(true);
 		circlePaint2.setXfermode(xfermode);
-
+		
 		canvas.drawArc(RectfCircle, startAngle + angle, 360 - angle, true, circlePaint2);
 		circlePaint2.setXfermode(null);
 		canvas.restoreToCount(sc);
@@ -669,6 +670,7 @@ public class CircularSeekBar extends View {
 		case MotionEvent.ACTION_UP:
 			up = true;
 			moved(x, y, up);
+			Log.e("Apptest", x+", "+y);
 			break;
 		case MotionEvent.ACTION_CANCEL:
 			setParentScrollAble(true);
@@ -737,6 +739,7 @@ public class CircularSeekBar extends View {
 
 		} else {
 			if (mListener != null) {
+				
 				mListener.onProgressChange(this, this.getProgress());
 			}
 			IS_PRESSED = false;
