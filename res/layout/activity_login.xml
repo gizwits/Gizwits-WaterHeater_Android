@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:background="@android:color/black"
     android:gravity="center"
-    android:orientation="vertical">
+    android:orientation="vertical" >
 
     <ImageView
         android:layout_width="wrap_content"
@@ -27,9 +27,10 @@
         style="@style/EditTextTheme"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
-        android:inputType="textPassword"
+        android:digits="@string/register_name_digits"
         android:drawableLeft="@drawable/login_icon_key"
-        android:hint="@string/password" />
+        android:hint="@string/password"
+        android:inputType="textPassword" />
 
     <TextView
         android:id="@+id/tvForgot"
@@ -46,9 +47,9 @@
         android:id="@+id/btnLogin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
+        android:layout_marginTop="30dp"
         android:background="@drawable/login_bt"
         android:text="@string/login"
         android:textColor="@android:color/black" />
@@ -58,9 +59,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginTop="30dp"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
+        android:layout_marginTop="30dp"
         android:background="@drawable/login_bt"
         android:text="@string/register"
         android:textColor="@android:color/black" />

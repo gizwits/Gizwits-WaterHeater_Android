@@ -17,11 +17,15 @@
  */
 package com.gizwits.framework.activity.account;
 
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
-
+import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -36,16 +40,19 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.gizwits.heater.R;
 import com.gizwits.framework.activity.BaseActivity;
 import com.gizwits.framework.activity.onboarding.SearchDeviceActivity;
+import com.gizwits.framework.config.Configs;
 import com.gizwits.framework.widget.MyInputFilter;
+import com.gizwits.heater.R;
 import com.xpg.common.useful.StringUtils;
 import com.xpg.ui.utils.ToastUtils;
+import com.xtremeprog.xpgconnect.XPGWifiSDK;
 
 // TODO: Auto-generated Javadoc
 
@@ -90,7 +97,26 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 	 * The btn re get code.
 	 */
 	private Button btnReGetCode;
+	/**
+	 * The btn get captchaCode.
+	 */
+	private Button btnGetCaptchaCode;
+	/**
+	 * The iv getCaptchaCode.
+	 */
+	private ImageView ivGetCaptchaCode;
 
+	/**
+	 * The et input captchaCode.
+	 */
+	private EditText etInputCaptchaCode;
+	private LinearLayout llCaptchaCode_Linear;
+	
+	/**
+	 * The pb CaptchaCode_loading
+	 */
+	private ProgressBar CaptchaCode_loading;
+	
 	/**
 	 * The btn sure.
 	 */
@@ -164,7 +190,15 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 		 * Toast弹出通知
 		 */
 		TOAST,
+		/**
+		 * 获取图片验证码
+		 */
+		CaptchaCode,
 
+		/**
+		 * 修改界面
+		 */
+		CHANGE
 	}
 
 	/**
@@ -190,11 +224,13 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 		 * email注册
 		 */
 		EMAIL,
+
 	}
 
 	/**
 	 * The handler.
 	 */
+	@SuppressLint("HandlerLeak")
 	Handler handler = new Handler() {
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
@@ -207,8 +243,7 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 					timer.cancel();
 					btnReGetCode.setEnabled(true);
 					btnReGetCode.setText("重新获取验证码");
-					btnReGetCode
-							.setBackgroundResource(R.drawable.button_blue_short);
+					btnReGetCode.setBackgroundResource(R.drawable.button_blue_short);
 				} else {
 					btnReGetCode.setText(secondleft + "秒后\n重新获取");
 
@@ -218,12 +253,11 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 			case REG_SUCCESS:
 				ToastUtils.showShort(RegisterActivity.this, (String) msg.obj);
 				dialog.cancel();
-				Bundle mBundle=new Bundle();
+				Bundle mBundle = new Bundle();
 				mBundle.putBoolean("isRegister", true);
 				Intent mIntent = new Intent();
 				mIntent.putExtras(mBundle);
-				mIntent.setClass(RegisterActivity.this,
-						SearchDeviceActivity.class);
+				mIntent.setClass(RegisterActivity.this, SearchDeviceActivity.class);
 				startActivity(mIntent);
 				finish();
 				break;
@@ -231,6 +265,13 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 			case TOAST:
 				ToastUtils.showShort(RegisterActivity.this, (String) msg.obj);
 				dialog.cancel();
+				break;
+			case CaptchaCode:
+				XPGWifiSDK.sharedInstance().getCaptchaCode(Configs.APP_SECRET);
+				break;
+			case CHANGE:	
+				toogleUI(ui_statue.PHONE);
+				isStartTimer();
 				break;
 			}
 		}
@@ -255,6 +296,12 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 	 * Inits the views.
 	 */
 	private void initViews() {
+		etInputCaptchaCode = (EditText) findViewById(R.id.etInputCaptchaCode);
+		llCaptchaCode_Linear = (LinearLayout) findViewById(R.id.CaptchaCode_Linear);
+		btnGetCaptchaCode = (Button) findViewById(R.id.btnReGetCaptchaCode);
+		ivGetCaptchaCode = (ImageView) findViewById(R.id.ivGetCaptchaCode);
+		CaptchaCode_loading=(ProgressBar) findViewById(R.id.CaptchaCode_loading);
+		//
 		tvTips = (TextView) findViewById(R.id.tvTips);
 		tvPhoneSwitch = (TextView) findViewById(R.id.tvPhoneSwitch);
 		etName = (EditText) findViewById(R.id.etName);
@@ -271,8 +318,8 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 		toogleUI(ui_statue.DEFAULT);
 		dialog = new ProgressDialog(this);
 		dialog.setMessage("处理中，请稍候...");
-		
-		MyInputFilter filter= new MyInputFilter();
+
+		MyInputFilter filter = new MyInputFilter();
 		etInputPsw.setFilters(new InputFilter[] { filter });
 	}
 
@@ -280,6 +327,8 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 	 * Inits the events.
 	 */
 	private void initEvents() {
+		btnGetCaptchaCode.setOnClickListener(this);
+		//
 		btnGetCode.setOnClickListener(this);
 		btnReGetCode.setOnClickListener(this);
 		btnSure.setOnClickListener(this);
@@ -288,14 +337,11 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 		tbPswFlag.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
 			@Override
-			public void onCheckedChanged(CompoundButton buttonView,
-					boolean isChecked) {
+			public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
 				if (isChecked) {
-					etInputPsw.setInputType(InputType.TYPE_CLASS_TEXT
-							| InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+					etInputPsw.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
 				} else {
-					etInputPsw.setInputType(InputType.TYPE_CLASS_TEXT
-							| InputType.TYPE_TEXT_VARIATION_PASSWORD);
+					etInputPsw.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
 				}
 
 			}
@@ -314,21 +360,28 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 		case R.id.btnGetCode:
 			String phone = etName.getText().toString().trim();
 			if (!StringUtils.isEmpty(phone) && phone.length() == 11) {
-				toogleUI(ui_statue.PHONE);
-				sendVerifyCode(phone);
+				if (!etInputCaptchaCode.getText().toString().isEmpty()) {
+					sendVerifyCode(phone);
+				} else {
+					ToastUtils.showShort(this, "请输入图片验证码。");
+				}
 			} else {
 				ToastUtils.showShort(this, "请输入正确的手机号码。");
 			}
 
 			break;
 		case R.id.btnReGetCode:
-			String phone2 = etName.getText().toString().trim();
-			if (!StringUtils.isEmpty(phone2) && phone2.length() == 11) {
-				toogleUI(ui_statue.PHONE);
-				sendVerifyCode(phone2);
-			} else {
-				ToastUtils.showShort(this, "请输入正确的手机号码。");
-			}
+			toogleUI(ui_statue.DEFAULT);
+//			String phone2 = etName.getText().toString().trim();
+//			if (!StringUtils.isEmpty(phone2) && phone2.length() == 11) {
+//				if (!etInputCaptchaCode.getText().toString().isEmpty()) {
+//					sendVerifyCode(phone2);
+//				} else {
+//					ToastUtils.showShort(this, "请输入图片验证码。");
+//				}
+//			} else {
+//				ToastUtils.showShort(this, "请输入正确的手机号码。");
+//			}
 			break;
 		case R.id.btnSure:
 			doRegister();
@@ -345,6 +398,11 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 		case R.id.ivBack:
 			onBackPressed();
 			break;
+		case R.id.btnReGetCaptchaCode:
+			ivGetCaptchaCode.setVisibility(View.GONE);
+			CaptchaCode_loading.setVisibility(View.VISIBLE);		
+			handler.sendEmptyMessage(handler_key.CaptchaCode.ordinal());
+			break;
 		}
 
 	}
@@ -357,31 +415,43 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 	 */
 	private void toogleUI(ui_statue statue) {
 		if (statue == ui_statue.DEFAULT) {
+			llCaptchaCode_Linear.setVisibility(View.VISIBLE);
 			llInputCode.setVisibility(View.GONE);
 			llInputPsw.setVisibility(View.GONE);
 			btnSure.setVisibility(View.GONE);
 			btnGetCode.setVisibility(View.VISIBLE);
 			etName.setHint("手机号");
-			etName.setText("");
+			etName.setEnabled(true);
+			etInputCaptchaCode.setText("");
+			etInputPsw.setText("");
+			etInputCode.setText("");
 			etName.setInputType(InputType.TYPE_CLASS_NUMBER);
 			tvPhoneSwitch.setText("邮箱注册");
 			tvTips.setVisibility(View.GONE);
+			ivGetCaptchaCode.setVisibility(View.GONE);
+			CaptchaCode_loading.setVisibility(View.VISIBLE);
+			handler.sendEmptyMessage(handler_key.CaptchaCode.ordinal());
 		} else if (statue == ui_statue.PHONE) {
+			llCaptchaCode_Linear.setVisibility(View.GONE);
 			llInputCode.setVisibility(View.VISIBLE);
 			llInputPsw.setVisibility(View.VISIBLE);
 			btnSure.setVisibility(View.VISIBLE);
 			btnGetCode.setVisibility(View.GONE);
-			etName.setHint("手机号");
+			etInputPsw.setText("");
+			etInputCode.setText("");
+			etName.setEnabled(false);
 			etName.setInputType(InputType.TYPE_CLASS_NUMBER);
 			tvPhoneSwitch.setText("邮箱注册");
 			tvTips.setVisibility(View.GONE);
 		} else {
+			llCaptchaCode_Linear.setVisibility(View.GONE);
 			llInputCode.setVisibility(View.GONE);
 			btnGetCode.setVisibility(View.GONE);
 			llInputPsw.setVisibility(View.VISIBLE);
 			btnSure.setVisibility(View.VISIBLE);
 			etName.setHint("邮箱");
 			etName.setText("");
+			etInputPsw.setText("");
 			etName.setInputType(InputType.TYPE_CLASS_TEXT);
 			tvPhoneSwitch.setText("手机注册");
 			tvTips.setVisibility(View.VISIBLE);
@@ -414,8 +484,7 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 				return;
 			}
 			mCenter.cRegisterPhoneUser(phone, code, password);
-			Log.e("Register", "phone=" + phone + ";code=" + code + ";password="
-					+ password);
+			Log.e("Register", "phone=" + phone + ";code=" + code + ";password=" + password);
 			dialog.show();
 		} else {
 			String mail = etName.getText().toString().trim();
@@ -445,35 +514,29 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 	 *            the phone
 	 */
 	private void sendVerifyCode(final String phone) {
+		String CaptchaCode = etInputCaptchaCode.getText().toString();
 		// TODO Auto-generated method stub
 		dialog.show();
-		btnReGetCode.setEnabled(false);
-		btnReGetCode.setBackgroundResource(R.drawable.button_gray_short);
-		secondleft = 60;
-		timer = new Timer();
-		timer.schedule(new TimerTask() {
+		
 
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				handler.sendEmptyMessage(handler_key.TICK_TIME.ordinal());
-			}
-		}, 1000, 1000);
+		// mCenter.cRequestSendVerifyCode(phone);
 
-		mCenter.cRequestSendVerifyCode(phone);
+		Log.i("AppTest", tokenString + ", " + captchaidString + ", " + CaptchaCode + ", " + phone);
+		mCenter.cRequestSendVerifyCode(tokenString, captchaidString, CaptchaCode, phone);
 	}
 
 	/*
 	 * 用户注册结果回调接口.
 	 */
-	/* (non-Javadoc)
-	 * @see com.gizwits.framework.activity.BaseActivity#didRegisterUser(int, java.lang.String, java.lang.String, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see com.gizwits.framework.activity.BaseActivity#didRegisterUser(int,
+	 * java.lang.String, java.lang.String, java.lang.String)
 	 */
 	@Override
-	protected void didRegisterUser(int error, String errorMessage, String uid,
-			String token) {
-		Log.i("error message uid token", error + " " + errorMessage + " " + uid
-				+ " " + token);
+	protected void didRegisterUser(int error, String errorMessage, String uid, String token) {
+		Log.i("error message uid token", error + " " + errorMessage + " " + uid + " " + token);
 		if (!uid.equals("") && !token.equals("")) {// 注册成功
 			Message msg = new Message();
 			msg.what = handler_key.REG_SUCCESS.ordinal();
@@ -492,23 +555,102 @@ public class RegisterActivity extends BaseActivity implements OnClickListener {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see com.gizwits.framework.activity.BaseActivity#didRequestSendVerifyCode(int, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * com.gizwits.framework.activity.BaseActivity#didRequestSendVerifyCode(int,
+	 * java.lang.String)
 	 */
-	@Override
-	protected void didRequestSendVerifyCode(int error, String errorMessage) {
-		Log.i("error message ", error + " " + errorMessage);
-		if (error == 0) {// 发送成功
+	/*
+	 * @Override protected void didRequestSendVerifyCode(int error, String
+	 * errorMessage) { Log.i("error message ", error + " " + errorMessage); if
+	 * (error == 0) {// 发送成功 Message msg = new Message(); msg.what =
+	 * handler_key.TOAST.ordinal(); msg.obj = "发送成功"; handler.sendMessage(msg);
+	 * } else {// 发送失败 Message msg = new Message(); msg.what =
+	 * handler_key.TOAST.ordinal(); msg.obj = errorMessage;
+	 * handler.sendMessage(msg); } }
+	 */
+	protected void didRequestSendPhoneSMSCode(int result, java.lang.String errorMessage) {
+		Log.e("AppTest", result + ", " + errorMessage);
+		if (result == 0) {// 发送成功
 			Message msg = new Message();
 			msg.what = handler_key.TOAST.ordinal();
 			msg.obj = "发送成功";
 			handler.sendMessage(msg);
+			handler.sendEmptyMessage(handler_key.CHANGE.ordinal());
 		} else {// 发送失败
 			Message msg = new Message();
 			msg.what = handler_key.TOAST.ordinal();
 			msg.obj = errorMessage;
 			handler.sendMessage(msg);
+			handler.sendEmptyMessage(handler_key.CaptchaCode.ordinal());
 		}
+	}
+
+	/**
+	 * 图片验证码回调
+	 */
+	private String tokenString, captchaidString, captcthishaURL_String;
+
+	protected void didGetCaptchaCode(int result, java.lang.String errorMessage, java.lang.String token,
+			java.lang.String captchaId, java.lang.String captcthishaURL) {
+		Log.e("Apptest",
+				"图片验证码回调" + result + ", " + errorMessage + ", " + token + ", " + captchaId + ", " + captcthishaURL);
+		tokenString = token;
+		captchaidString = captchaId;
+		captcthishaURL_String = captcthishaURL;
+		new load_image().execute(captcthishaURL_String);
+	}
+
+	class load_image extends AsyncTask<String, Void, Drawable> {
+
+		/**
+		 * 加载网络图片
+		 * 
+		 * @param url
+		 * @return
+		 */
+		private Drawable LoadImageFromWebOperations(String url) {
+			InputStream is = null;
+			Drawable d = null;
+			try {
+				is = (InputStream) new URL(url).getContent();
+				d = Drawable.createFromStream(is, "src name");
+				return d;
+			} catch (Exception e) {
+				return null;
+			}
+		}
+
+		@Override
+		protected Drawable doInBackground(String... params) {
+			Drawable drawable = LoadImageFromWebOperations(params[0]);
+			return drawable;
+		}
+
+		@Override
+		protected void onPostExecute(Drawable result) {
+			super.onPostExecute(result);
+			ivGetCaptchaCode.setImageDrawable(result);
+			CaptchaCode_loading.setVisibility(View.GONE);
+			ivGetCaptchaCode.setVisibility(View.VISIBLE);
+		}
+
+	}
+	public void isStartTimer() {
+		btnReGetCode.setEnabled(false);
+		btnReGetCode.setBackgroundResource(R.drawable.button_gray_short);
+		secondleft = 60;
+		timer = new Timer();
+		timer.schedule(new TimerTask() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				handler.sendEmptyMessage(handler_key.TICK_TIME.ordinal());
+			}
+		}, 1000, 1000);
 	}
 
 }

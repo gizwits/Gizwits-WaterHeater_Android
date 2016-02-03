@@ -89,7 +89,8 @@
         android:layout_marginRight="30dp"
         android:layout_marginTop="4dp"
         android:hint="@string/device_name"
-        android:textColor="@color/background_blue" />
+        android:textColor="@color/background_blue"
+        android:inputType="text" />
 
     <RelativeLayout
         android:layout_width="match_parent"
