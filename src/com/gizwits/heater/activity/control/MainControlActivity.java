@@ -484,10 +484,10 @@ public class MainControlActivity extends BaseActivity implements OnClickListener
 				
 				SettingTemp = (int) (newProgress * 45 / 100.00 + 30);
 				tvSettingTemerature.setText(SettingTemp + "");
-				if (newProgress==0||newProgress==100) {
+				/*if (newProgress==0||newProgress==100) {
 					mCenter.cSetTemp(mXpgWifiDevice, SettingTemp);
 					updateHeaterTips();
-				}
+				}*/
 				
 			}
 		});
