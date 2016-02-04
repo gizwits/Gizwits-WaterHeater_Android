@@ -47,7 +47,8 @@
             style="@style/EditTextTheme"
             android:layout_weight="1"
             android:background="@android:color/transparent"
-            android:hint="@string/password" />
+            android:hint="@string/password"
+            android:digits="@string/register_name_digits" />
 
         <ToggleButton
             android:id="@+id/tbPswFlag"
